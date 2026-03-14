@@ -4,6 +4,7 @@
 <html lang="en" data-redirect-timezone="1">
 <head>
 <style id="cornelius-hide">
+/* Hide TwelveLabs logo elements */
 [data-framer-name="logo-dark"],
 [data-framer-name="logo-light"],
 [data-framer-name="TL-Lockup"] {
@@ -11,34 +12,9 @@
   filter: opacity(0) !important;
 }
 
-/* Both desktop and mobile: scroll with page content */
-body { position: relative; }
-
-/* DESKTOP */
-@media (min-width: 810px) {
-  body::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0;
-    width: 560px; height: 68px;
-    background: var(--cnav-bg, #f4f3f3);
-    z-index: 2147483646;
-    pointer-events: none;
-  }
-  body::after {
-    content: '';
-    position: absolute;
-    left: 40px; top: -16px;
-    width: 503px; height: 101px;
-    background: url('/assets/cornelius_wordmark.png') no-repeat left center;
-    background-size: contain;
-    z-index: 2147483647;
-    pointer-events: none;
-  }
-}
-
-/* MOBILE - working, don't change */
+/* MOBILE - working, don't touch */
 @media (max-width: 809px) {
+  body { position: relative; }
   body::before {
     content: '';
     position: absolute;
@@ -660,8 +636,42 @@ body { position: relative; }
 
 
 
+
 <script>
 (function(){
+  // DESKTOP ONLY - inject logo inside navbar DOM so it scrolls naturally
+  if(window.innerWidth <= 809) return;
+
+  function inject() {
+    // Find the logo container inside the navbar
+    var container = document.querySelector('a.framer-tgbekc .framer-1r8bi41') ||
+                    document.querySelector('.framer-zhrl52-container .framer-1r8bi41') ||
+                    document.querySelector('.framer-1r8bi41');
+    if(!container) return false;
+    if(container.querySelector('img.cornelius-logo')) return true;
+
+    container.style.overflow = 'visible';
+    // Also make parents overflow visible
+    var p = container.parentElement;
+    for(var i=0;i<5;i++){ if(!p) break; p.style.overflow='visible'; p=p.parentElement; }
+
+    var img = document.createElement('img');
+    img.className = 'cornelius-logo';
+    img.src = '/assets/cornelius_wordmark.png';
+    img.style.cssText = 'position:absolute;left:0;top:50%;transform:translateY(-50%);width:503px;height:101px;object-fit:contain;object-position:left center;z-index:9999;pointer-events:none;';
+    container.appendChild(img);
+    return true;
+  }
+
+  [200,500,1000,2000,3000].forEach(function(t){ setTimeout(inject,t); });
+  new MutationObserver(function(){
+    if(!document.querySelector('img.cornelius-logo')) inject();
+  }).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+<script>
+(function(){
+  if(window.innerWidth > 809) return;
   var root = document.documentElement;
   function detectBg() {
     var els = ['.framer-vmujlj','.framer-Y0PUE','.framer-bchH9'].map(function(s){ return document.querySelector(s); });
