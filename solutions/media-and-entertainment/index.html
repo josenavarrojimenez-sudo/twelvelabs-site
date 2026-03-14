@@ -4,11 +4,34 @@
 <html lang="en" data-redirect-timezone="1">
 <head>
 <style id="cornelius-hide">
-/* clip-path hides visually but keeps layout - Framer never overrides this */
 [data-framer-name="logo-dark"],
 [data-framer-name="logo-light"],
-[data-framer-name="TL-Lockup"] {
-  clip-path: inset(0 100% 0 0) !important;
+[data-framer-name="TL-Lockup"] { opacity: 0 !important; }
+
+@media (max-width: 809px) {
+  body::before {
+    content: '';
+    position: fixed;
+    left: 0; top: 0;
+    width: 260px; height: 76px;
+    background: var(--cnav-bg, #f4f3f3);
+    z-index: 9998;
+    pointer-events: none;
+    opacity: var(--cnav-show, 1);
+    transition: opacity 0.15s;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    left: 20px; top: 5px;
+    width: 330px; height: 66px;
+    background: url('/assets/cornelius_wordmark.png') no-repeat left center;
+    background-size: contain;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: var(--cnav-show, 1);
+    transition: opacity 0.15s;
+  }
 }
 </style>
 	<meta charset="utf-8">
@@ -498,45 +521,23 @@
 
 
 
+
 <script>
 (function(){
   if(window.innerWidth > 809) return;
-  var img = null;
-
-  function placeCornelius() {
-    // Use the CONTAINER (not logo-dark) to get position - container not affected by clip-path
-    var container = null;
-    document.querySelectorAll('.framer-zhrl52-container, .framer-1r8bi41').forEach(function(el){
-      var r = el.getBoundingClientRect();
-      if(r.width > 0 && r.height > 0 && !container) container = el;
-    });
-    if(!container) return false;
-
-    var r = container.getBoundingClientRect();
-    if(!img) {
-      img = document.createElement('img');
-      img.className = 'cornelius-logo';
-      img.src = '/assets/cornelius_wordmark.png';
-      img.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;object-fit:contain;object-position:left center;width:320px;height:64px;';
-      document.body.appendChild(img);
-    }
-    img.style.left = r.left + 'px';
-    img.style.top  = (r.top + r.height/2 - 32) + 'px';
-    img.style.display = 'block';
-    return true;
-  }
-
+  var root = document.documentElement;
+  // Hide overlay when user scrolls (navbar scrolls away on mobile)
   window.addEventListener('scroll', function(){
-    if(img) img.style.display = window.scrollY > 5 ? 'none' : 'block';
+    root.style.setProperty('--cnav-show', window.scrollY > 5 ? '0' : '1');
   }, {passive:true});
-
-  var t = setInterval(function(){ if(placeCornelius()) clearInterval(t); }, 200);
-  setTimeout(function(){ clearInterval(t); }, 15000);
-
+  // Match cover color to actual navbar bg when menu opens
   new MutationObserver(function(){
-    if(!document.querySelector('.cornelius-logo')) { img=null; }
-    placeCornelius();
-  }).observe(document.body, {childList:true, subtree:true});
+    var nav = document.querySelector('.framer-Y0PUE');
+    if(nav) {
+      var h = nav.getBoundingClientRect().height;
+      root.style.setProperty('--cnav-bg', h > 100 ? '#fff' : '#f4f3f3');
+    }
+  }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
 })();
 </script>
 </body>
