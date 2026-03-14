@@ -705,5 +705,34 @@
   });
 })();
 </script>
+<script>
+(function(){
+  if(window.innerWidth > 809) return;
+  var root = document.documentElement;
+  // Find the mobile navbar element
+  function getNav() {
+    return document.querySelector('.framer-Y0PUE') ||
+           document.querySelector('[data-framer-name="mobile-nav-nobg"]');
+  }
+  function syncLogo() {
+    var nav = getNav();
+    if(!nav) { root.style.setProperty('--cornelius-display','block'); return; }
+    var rect = nav.getBoundingClientRect();
+    // Show logo only when navbar is at top of screen
+    root.style.setProperty('--cornelius-display', rect.top <= 1 ? 'block' : 'none');
+  }
+  window.addEventListener('scroll', syncLogo, {passive:true});
+  // Menu open detection
+  function updateCoverBg() {
+    var nav = getNav();
+    var open = nav && nav.getBoundingClientRect().height > 100;
+    root.style.setProperty('--cornelius-cover-bg', open ? '#ffffff' : '#f4f3f3');
+  }
+  var obs = new MutationObserver(function(){ syncLogo(); updateCoverBg(); });
+  obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
+  syncLogo();
+  updateCoverBg();
+})();
+</script>
 </body>
 </html>
