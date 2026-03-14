@@ -4,9 +4,33 @@
 <html lang="en" data-redirect-timezone="1">
 <head>
 <style id="cornelius-hide">
+/* Hide TwelveLabs logo elements everywhere */
 [data-framer-name="logo-dark"],
 [data-framer-name="logo-light"],
 [data-framer-name="TL-Lockup"] { opacity: 0 !important; }
+
+/* MOBILE ONLY: CSS pseudo-element logo (React can't remove this) */
+@media (max-width: 809px) {
+  .framer-1r8bi41 {
+    overflow: visible !important;
+  }
+  .framer-zhrl52-container {
+    overflow: visible !important;
+  }
+  .framer-1r8bi41::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 220px;
+    height: 44px;
+    background: url('/assets/cornelius_wordmark.png') no-repeat left center;
+    background-size: contain;
+    z-index: 9999;
+    pointer-events: none;
+  }
+}
 </style>
 	<meta charset="utf-8">
 	
