@@ -595,74 +595,86 @@
 
 
 
+
 <script>
 (function(){
-  var isMobile = window.innerWidth <= 809;
+  function getLogoEl() {
+    // Try logo-dark first
+    var els = document.querySelectorAll('[data-framer-name="logo-dark"]');
+    for(var i=0;i<els.length;i++){
+      var r = els[i].getBoundingClientRect();
+      if(r.width>0 && r.height>0) return els[i];
+    }
+    // Fallback: any framer-1r8bi41 with a real rect
+    var els2 = document.querySelectorAll('.framer-1r8bi41');
+    for(var i=0;i<els2.length;i++){
+      var r = els2[i].getBoundingClientRect();
+      if(r.width>0 && r.height>0) return els2[i];
+    }
+    return null;
+  }
 
   function inject() {
-    var w = isMobile ? 220 : 503;
-    var h = isMobile ? 44 : 101;
+    var w = window.innerWidth;
+    var mobile = w <= 809;
+    var lw = mobile ? 220 : 503;
+    var lh = mobile ? 44 : 101;
 
-    var logoEl = null;
-    document.querySelectorAll('[data-framer-name="logo-dark"]').forEach(function(el){
-      var r = el.getBoundingClientRect();
-      if(r.width > 0 && !logoEl) logoEl = el;
-    });
+    var logoEl = getLogoEl();
     if(!logoEl) return false;
 
-    document.querySelectorAll('.cornelius-cover,.cornelius-logo').forEach(function(i){ i.remove(); });
-
+    // Already injected at same position?
+    var existing = document.querySelector('.cornelius-logo');
     var r = logoEl.getBoundingClientRect();
-
-    if(isMobile) {
-      // Force hide TwelveLabs via setProperty (beats Framer inline styles)
-      document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
-        el.style.setProperty('opacity','0','important');
-        el.style.setProperty('visibility','hidden','important');
-      });
-      // Cover with white box
-      var cover = document.createElement('div');
-      cover.className = 'cornelius-cover';
-      cover.style.cssText = 'position:fixed;left:0;top:'+r.top+'px;width:300px;height:'+r.height+'px;background:#ffffff;z-index:9998;pointer-events:none';
-      document.body.appendChild(cover);
+    if(existing) {
+      var el = parseFloat(existing.style.left);
+      if(Math.abs(el - r.left) < 5) return true; // already correct
+      existing.remove();
+      var ec = document.querySelector('.cornelius-cover');
+      if(ec) ec.remove();
     }
+
+    // Hide TwelveLabs
+    document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
+      el.style.setProperty('opacity','0','important');
+    });
+
+    // Cover (mobile + desktop - transparent so it doesn't affect desktop bg)
+    var cover = document.createElement('div');
+    cover.className = 'cornelius-cover';
+    var bg = mobile ? 'rgba(255,255,255,1)' : 'transparent';
+    cover.style.cssText = 'position:fixed;left:0;top:'+r.top+'px;width:'+(r.left+r.width+20)+'px;height:'+r.height+'px;background:'+bg+';z-index:9998;pointer-events:none';
+    document.body.appendChild(cover);
 
     var img = document.createElement('img');
     img.className = 'cornelius-logo';
     img.src = '/assets/cornelius_wordmark.png';
-    img.style.cssText = 'position:fixed;left:'+r.left+'px;top:'+(r.top+r.height/2-h/2)+'px;width:'+w+'px;height:'+h+'px;object-fit:contain;object-position:left center;z-index:9999;pointer-events:none';
+    img.style.cssText = 'position:fixed;left:'+r.left+'px;top:'+(r.top+r.height/2-lh/2)+'px;width:'+lw+'px;height:'+lh+'px;object-fit:contain;object-position:left center;z-index:9999;pointer-events:none';
     document.body.appendChild(img);
     return true;
   }
 
-  // Aggressive polling + rAF for mobile
-  var done = false;
-  function loop() {
-    if(!done) {
-      done = inject();
-      requestAnimationFrame(loop);
-    }
-  }
-  requestAnimationFrame(loop);
-  // Stop trying after 5s but keep watching
-  setTimeout(function(){ done = true; }, 5000);
+  // Poll every 300ms for up to 20 seconds
+  var timer = setInterval(function(){
+    if(inject()) clearInterval(timer);
+  }, 300);
+  setTimeout(function(){ clearInterval(timer); }, 20000);
 
-  // Re-inject after any DOM change
+  // Re-inject if removed
   var obs = new MutationObserver(function(){
     if(!document.querySelector('.cornelius-logo')){
-      done = false;
-      requestAnimationFrame(loop);
-      setTimeout(function(){ done = true; }, 3000);
+      inject();
     }
+    // Re-hide if Framer re-adds opacity
+    document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
+      if(el.style.opacity !== '0') el.style.setProperty('opacity','0','important');
+    });
   });
-  obs.observe(document.body, {childList:true, subtree:true});
+  obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
 
-  window.addEventListener('resize', function(){
-    isMobile = window.innerWidth <= 809;
-    document.querySelectorAll('.cornelius-cover,.cornelius-logo').forEach(function(i){ i.remove(); });
-    done = false;
-    requestAnimationFrame(loop);
-    setTimeout(function(){ done = true; }, 3000);
+  window.addEventListener('resize',function(){
+    document.querySelectorAll('.cornelius-cover,.cornelius-logo').forEach(function(i){i.remove();});
+    inject();
   });
 })();
 </script>
