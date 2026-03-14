@@ -4,23 +4,25 @@
 <html lang="en" data-redirect-timezone="1">
 <head>
 <style id="cornelius-hide">
+/* Hide TwelveLabs logo - display:none is stronger than opacity */
 [data-framer-name="logo-dark"],
 [data-framer-name="logo-light"],
-[data-framer-name="TL-Lockup"] { opacity: 0 !important; }
+[data-framer-name="TL-Lockup"] { display: none !important; }
 
 @media (max-width: 809px) {
+  /* position:absolute scrolls WITH the page (not fixed) */
+  body { position: relative; }
   body::after {
     content: '';
-    position: fixed;
+    position: absolute;
     left: 20px;
-    top: -11px;
+    top: 16px;
     width: 495px;
     height: 99px;
     background: url('/assets/cornelius_wordmark.png') no-repeat left center;
     background-size: contain;
     z-index: 9999;
     pointer-events: none;
-    display: var(--cornelius-display, block);
   }
 }
 </style>
@@ -430,15 +432,6 @@
 
 
 
-<script>
-(function(){
-  if(window.innerWidth > 809) return;
-  var root = document.documentElement;
-  // Hide logo when user scrolls away from top (navbar not sticky on mobile)
-  window.addEventListener('scroll', function(){
-    root.style.setProperty('--cornelius-display', window.scrollY > 5 ? 'none' : 'block');
-  }, {passive:true});
-})();
-</script>
+
 </body>
 </html>
