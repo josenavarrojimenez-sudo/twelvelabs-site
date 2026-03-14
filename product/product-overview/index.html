@@ -219,18 +219,19 @@
   document.addEventListener('click', function(e){
     var a = e.target.closest('a[href]');
     if (!a) return;
-    var href = a.getAttribute('href');
-    if (!href) return;
-    // Only intercept internal absolute paths
-    if (href.charAt(0) === '/' && href.charAt(1) !== '/') {
-      // Skip anchors-only
-      if (href.charAt(0) === '#') return;
-      // Skip if already navigating to same page
-      if (window.location.pathname === href) return;
+    // Use resolved absolute URL, not raw attribute
+    var resolved = a.href;
+    if (!resolved) return;
+    try {
+      var url = new URL(resolved);
+      // Only intercept same-origin links
+      if (url.origin !== window.location.origin) return;
+      // Skip pure hash links
+      if (url.pathname === window.location.pathname && url.hash) return;
       e.preventDefault();
       e.stopPropagation();
-      window.location.href = href;
-    }
+      window.location.href = url.pathname + url.search + url.hash;
+    } catch(err) {}
   }, true);
 })();
 </script>
