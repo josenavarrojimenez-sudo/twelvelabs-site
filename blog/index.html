@@ -12,26 +12,26 @@
   filter: opacity(0) !important;
 }
 @media (max-width: 809px) {
+  /* absolute = scrolls with page content, not sticky */
+  body { position: relative; }
   body::before {
     content: '';
-    position: fixed;
+    position: absolute;
     left: 0; top: 0;
     width: 260px; height: 76px;
     background: var(--cnav-bg, #f4f3f3);
     z-index: 2147483646;
     pointer-events: none;
-    opacity: var(--cnav-show, 1);
   }
   body::after {
     content: '';
-    position: fixed;
+    position: absolute;
     left: 20px; top: 5px;
     width: 330px; height: 66px;
     background: url('/assets/cornelius_wordmark.png') no-repeat left center;
     background-size: contain;
     z-index: 2147483647;
     pointer-events: none;
-    opacity: var(--cnav-show, 1);
   }
 }
 </style>
@@ -443,33 +443,21 @@
 
 
 
+
 <script>
 (function(){
   if(window.innerWidth > 809) return;
   var root = document.documentElement;
-
-  // Detect EXACT navbar background color
   function detectNavBg() {
-    var candidates = [
-      document.querySelector('.framer-vmujlj'),
-      document.querySelector('.framer-Y0PUE'),
-      document.querySelector('.framer-bchH9'),
-      document.body
-    ];
-    for(var i=0; i<candidates.length; i++) {
-      if(!candidates[i]) continue;
-      var bg = window.getComputedStyle(candidates[i]).backgroundColor;
-      if(bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-        root.style.setProperty('--cnav-bg', bg);
-        return;
+    var els = ['.framer-vmujlj','.framer-Y0PUE','.framer-bchH9'].map(function(s){ return document.querySelector(s); });
+    for(var i=0;i<els.length;i++){
+      if(!els[i]) continue;
+      var bg = window.getComputedStyle(els[i]).backgroundColor;
+      if(bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent'){
+        root.style.setProperty('--cnav-bg', bg); return;
       }
     }
   }
-
-  window.addEventListener('scroll', function(){
-    root.style.setProperty('--cnav-show', window.scrollY > 5 ? '0' : '1');
-  }, {passive:true});
-
   setTimeout(detectNavBg, 300);
   setTimeout(detectNavBg, 1000);
 })();
