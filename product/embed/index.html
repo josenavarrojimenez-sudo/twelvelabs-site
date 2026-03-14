@@ -11,8 +11,17 @@
   visibility: hidden !important;
   filter: opacity(0) !important;
 }
-
 @media (max-width: 809px) {
+  body::before {
+    content: '';
+    position: fixed;
+    left: 0; top: 0;
+    width: 260px; height: 76px;
+    background: var(--cnav-bg, #f4f3f3);
+    z-index: 2147483646;
+    pointer-events: none;
+    opacity: var(--cnav-show, 1);
+  }
   body::after {
     content: '';
     position: fixed;
@@ -524,22 +533,33 @@
 
 
 
+
 <script>
 (function(){
   if(window.innerWidth > 809) return;
   var root = document.documentElement;
-  // Hide overlay when user scrolls (navbar scrolls away on mobile)
+
+  function detectBg() {
+    // Walk up from navbar to find real background color
+    var el = document.querySelector('.framer-Y0PUE') || document.body;
+    while(el && el !== document.documentElement) {
+      var bg = window.getComputedStyle(el).backgroundColor;
+      if(bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+        root.style.setProperty('--cnav-bg', bg);
+        return;
+      }
+      el = el.parentElement;
+    }
+    // Fallback: use body background
+    root.style.setProperty('--cnav-bg', window.getComputedStyle(document.body).backgroundColor || '#f4f3f3');
+  }
+
   window.addEventListener('scroll', function(){
     root.style.setProperty('--cnav-show', window.scrollY > 5 ? '0' : '1');
   }, {passive:true});
-  // Match cover color to actual navbar bg when menu opens
-  new MutationObserver(function(){
-    var nav = document.querySelector('.framer-Y0PUE');
-    if(nav) {
-      var h = nav.getBoundingClientRect().height;
-      root.style.setProperty('--cnav-bg', h > 100 ? '#fff' : '#f4f3f3');
-    }
-  }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
+
+  setTimeout(detectBg, 500);
+  setTimeout(detectBg, 1500);
 })();
 </script>
 </body>
