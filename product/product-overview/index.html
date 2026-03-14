@@ -244,13 +244,13 @@ div[data-framer-name="logo-light"] { visibility: hidden !important; }
 /* Overlay Cornelius wordmark on the exact logo container (179x36) */
 .framer-1r8bi41 {
   overflow: visible !important;
-  width: 402px !important;
-  height: 81px !important;
 }
 .framer-1r8bi41::before {
   content: '';
   position: absolute;
-  inset: 0;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
   width: 402px;
   height: 81px;
   background: url('/assets/cornelius_wordmark.png') no-repeat left center;
