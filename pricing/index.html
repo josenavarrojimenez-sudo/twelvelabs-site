@@ -4,9 +4,35 @@
 <html lang="en" data-redirect-timezone="1">
 <head>
 <style id="cornelius-hide">
+[data-framer-name="logo-dark"],
+[data-framer-name="logo-light"],
+[data-framer-name="TL-Lockup"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  filter: opacity(0) !important;
+}
 @media (max-width: 809px) {
-  .framer-1r8bi41 { overflow: visible !important; }
-  .framer-zhrl52-container { overflow: visible !important; }
+  body::before {
+    content: '';
+    position: fixed;
+    left: 0; top: 0;
+    width: 260px; height: 76px;
+    background: var(--cnav-bg, #f4f3f3);
+    z-index: 2147483646;
+    pointer-events: none;
+    opacity: var(--cnav-show, 1);
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    left: 20px; top: 5px;
+    width: 330px; height: 66px;
+    background: url('/assets/cornelius_wordmark.png') no-repeat left center;
+    background-size: contain;
+    z-index: 2147483647;
+    pointer-events: none;
+    opacity: var(--cnav-show, 1);
+  }
 }
 </style>
 	<meta charset="utf-8">
@@ -449,56 +475,36 @@
 
 
 
+
 <script>
 (function(){
   if(window.innerWidth > 809) return;
+  var root = document.documentElement;
 
-  function killTwelveLabs() {
-    // REMOVE from DOM entirely - not hide, REMOVE
-    document.querySelectorAll(
-      '[data-framer-name="logo-dark"],' +
-      '[data-framer-name="logo-light"],' +
-      '[data-framer-name="TL-Lockup"]'
-    ).forEach(function(el){ el.remove(); });
+  // Detect EXACT navbar background color
+  function detectNavBg() {
+    var candidates = [
+      document.querySelector('.framer-vmujlj'),
+      document.querySelector('.framer-Y0PUE'),
+      document.querySelector('.framer-bchH9'),
+      document.body
+    ];
+    for(var i=0; i<candidates.length; i++) {
+      if(!candidates[i]) continue;
+      var bg = window.getComputedStyle(candidates[i]).backgroundColor;
+      if(bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+        root.style.setProperty('--cnav-bg', bg);
+        return;
+      }
+    }
   }
 
-  function injectCornelius() {
-    var container = document.querySelector('.framer-zhrl52-container .framer-1r8bi41');
-    if(!container) return false;
-    if(container.querySelector('img.cornelius-logo')) return true;
-    container.style.overflow = 'visible';
-    var img = document.createElement('img');
-    img.className = 'cornelius-logo';
-    img.src = '/assets/cornelius_wordmark.png';
-    img.style.cssText = 'position:absolute;left:0;top:50%;transform:translateY(-50%);width:320px;height:64px;object-fit:contain;object-position:left center;z-index:10;pointer-events:none;';
-    container.appendChild(img);
-    return true;
-  }
+  window.addEventListener('scroll', function(){
+    root.style.setProperty('--cnav-show', window.scrollY > 5 ? '0' : '1');
+  }, {passive:true});
 
-  function update() {
-    killTwelveLabs();
-    injectCornelius();
-  }
-
-  // Run repeatedly until stable
-  update();
-  [100,300,600,1000,2000,3000].forEach(function(t){ setTimeout(update, t); });
-
-  // Watch for React re-renders and re-apply
-  var obs = new MutationObserver(function(mutations) {
-    mutations.forEach(function(m) {
-      m.addedNodes.forEach(function(n) {
-        if(n.nodeType === 1) {
-          var name = n.getAttribute && n.getAttribute('data-framer-name');
-          if(name === 'logo-dark' || name === 'logo-light' || name === 'TL-Lockup') {
-            n.remove(); // Remove immediately when React adds it back
-          }
-        }
-      });
-    });
-    if(!document.querySelector('.cornelius-logo')) injectCornelius();
-  });
-  obs.observe(document.body, {childList:true, subtree:true});
+  setTimeout(detectNavBg, 300);
+  setTimeout(detectNavBg, 1000);
 })();
 </script>
 </body>
