@@ -4,33 +4,30 @@
 <html lang="en" data-redirect-timezone="1">
 <head>
 <style id="cornelius-hide">
-/* Hide TwelveLabs logo elements */
 [data-framer-name="logo-dark"],
 [data-framer-name="logo-light"],
 [data-framer-name="TL-Lockup"] { opacity: 0 !important; }
 
-/* MOBILE: Fixed-position Cornelius logo via body pseudo-elements */
-/* body::before = white cover over TwelveLabs logo */
-/* body::after  = Cornelius wordmark */
 @media (max-width: 809px) {
   body::before {
     content: '';
     position: fixed;
     left: 0;
     top: 0;
-    width: 260px;
+    width: 370px;
     height: 76px;
-    background: #f4f3f3;
+    background: var(--cornelius-cover-bg, #f4f3f3);
     z-index: 9998;
     pointer-events: none;
+    transition: background 0.2s;
   }
   body::after {
     content: '';
     position: fixed;
     left: 20px;
-    top: 16px;
-    width: 220px;
-    height: 44px;
+    top: 5px;
+    width: 330px;
+    height: 66px;
     background: url('/assets/cornelius_wordmark.png') no-repeat left center;
     background-size: contain;
     z-index: 9999;
