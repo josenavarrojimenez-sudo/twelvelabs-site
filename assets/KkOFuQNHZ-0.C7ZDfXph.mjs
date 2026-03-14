@@ -1,0 +1,2 @@
+import{n as e}from"./rolldown-runtime.iAKtxfbz.mjs";var t,n;e((()=>{t=`자세히 알아보기`,n={exports:{v0:{type:`variable`,annotations:{framerContractVersion:`1`}},__FramerMetadata__:{type:`variable`}}}}))();export{n as __FramerMetadata__,t as v0};
+//# sourceMappingURL=KkOFuQNHZ-0.C7ZDfXph.mjs.map
