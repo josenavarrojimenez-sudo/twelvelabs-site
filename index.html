@@ -601,50 +601,90 @@
 
 
 
+
 <script>
 (function(){
-  function injectCornelius() {
-    var isMobile = window.innerWidth <= 809;
-    var w = isMobile ? 220 : 503;
-    var h = isMobile ? 44 : 101;
+  var MOBILE = window.innerWidth <= 809;
 
-    // Find the visible logo-dark (has a real bounding rect)
+  /* ── DESKTOP (working perfectly – don't change) ── */
+  function injectDesktop() {
     var logoEl = null;
     document.querySelectorAll('[data-framer-name="logo-dark"]').forEach(function(el){
-      var rect = el.getBoundingClientRect();
-      if(rect.width > 0 && rect.height > 0 && !logoEl) logoEl = el;
+      var r = el.getBoundingClientRect();
+      if(r.width > 0 && !logoEl) logoEl = el;
     });
     if(!logoEl) return;
-
-    // Remove existing Cornelius logo
-    document.querySelectorAll('img.cornelius-logo').forEach(function(i){ i.remove(); });
-
-    var rect = logoEl.getBoundingClientRect();
+    document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){ el.style.opacity='0'; });
+    if(document.querySelector('img.cornelius-logo')) return;
+    var r = logoEl.getBoundingClientRect(), w=503, h=101;
     var img = document.createElement('img');
-    img.className = 'cornelius-logo';
-    img.src = '/assets/cornelius_wordmark.png';
-    img.style.cssText = [
-      'position:fixed',
-      'left:' + rect.left + 'px',
-      'top:' + (rect.top + rect.height/2 - h/2) + 'px',
-      'width:' + w + 'px',
-      'height:' + h + 'px',
-      'object-fit:contain',
-      'object-position:left center',
-      'z-index:9999',
-      'pointer-events:none'
-    ].join(';');
+    img.className='cornelius-logo';
+    img.src='/assets/cornelius_wordmark.png';
+    img.style.cssText='position:fixed;left:'+r.left+'px;top:'+(r.top+r.height/2-h/2)+'px;width:'+w+'px;height:'+h+'px;object-fit:contain;object-position:left center;z-index:9999;pointer-events:none';
     document.body.appendChild(img);
   }
 
-  [200, 600, 1200].forEach(function(t){ setTimeout(injectCornelius, t); });
+  /* ── MOBILE: poll until nav is visible, then inject inside container ── */
+  function injectMobile() {
+    // Hide old TwelveLabs elements via JS (overrides React inline styles)
+    document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
+      el.style.setProperty('opacity','0','important');
+    });
+    // Find the mobile logo container that has a real rect
+    var container = null;
+    document.querySelectorAll('.framer-1r8bi41').forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if(r.width > 0 && !container) container = el;
+    });
+    if(!container) return false;
+    if(container.querySelector('img.cornelius-logo')) return true;
+    // Make parents overflow visible
+    var p = container;
+    for(var i=0;i<8;i++){ if(!p) break; p.style.overflow='visible'; p=p.parentElement; }
+    var img = document.createElement('img');
+    img.className='cornelius-logo';
+    img.src='/assets/cornelius_wordmark.png';
+    img.style.cssText='position:absolute;left:0;top:50%;transform:translateY(-50%);width:220px;height:44px;object-fit:contain;object-position:left center;z-index:9999;pointer-events:none';
+    container.style.position='relative';
+    container.appendChild(img);
+    return true;
+  }
 
-  var observer = new MutationObserver(function(){
-    if(!document.querySelector('img.cornelius-logo')) injectCornelius();
+  if(!MOBILE) {
+    // Desktop
+    [200,600,1200].forEach(function(t){ setTimeout(injectDesktop,t); });
+    var obs = new MutationObserver(function(){
+      if(!document.querySelector('img.cornelius-logo')) injectDesktop();
+    });
+    obs.observe(document.body,{childList:true,subtree:true});
+  } else {
+    // Mobile: poll until injected
+    var attempts = 0;
+    function tryMobile() {
+      attempts++;
+      var done = injectMobile();
+      if(!done && attempts < 30) setTimeout(tryMobile, 200);
+    }
+    tryMobile();
+    // Re-run after Framer hydration
+    setTimeout(function(){
+      document.querySelectorAll('img.cornelius-logo').forEach(function(i){ i.remove(); });
+      attempts=0; tryMobile();
+    }, 1500);
+    // Watch for React re-renders
+    var mobs = new MutationObserver(function(){
+      document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
+        el.style.setProperty('opacity','0','important');
+      });
+    });
+    mobs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
+  }
+
+  window.addEventListener('resize', function(){
+    MOBILE = window.innerWidth <= 809;
+    document.querySelectorAll('img.cornelius-logo').forEach(function(i){ i.remove(); });
+    if(!MOBILE) injectDesktop(); else { attempts=0; tryMobile(); }
   });
-  observer.observe(document.body, {childList:true, subtree:true});
-
-  window.addEventListener('resize', injectCornelius);
 })();
 </script>
 </body>
