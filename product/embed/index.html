@@ -499,7 +499,7 @@ function replaceLogo() {
   });
 
   // Only target containers that aren't already done
-  document.querySelectorAll('.framer-1r8bi41').forEach(function(container) {
+  document.querySelectorAll('a[href="/"] .framer-1r8bi41').forEach(function(container) {
     // Remove old injected images first (for resize)
     container.querySelectorAll('img.cornelius-logo').forEach(function(i){ i.remove(); });
     
