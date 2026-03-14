@@ -9,29 +9,18 @@
 [data-framer-name="TL-Lockup"] { opacity: 0 !important; }
 
 @media (max-width: 809px) {
-  body::before {
-    content: '';
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 370px;
-    height: 76px;
-    background: var(--cornelius-cover-bg, #f4f3f3);
-    z-index: 9998;
-    pointer-events: none;
-    transition: background 0.2s;
-  }
   body::after {
     content: '';
     position: fixed;
     left: 20px;
-    top: 5px;
-    width: 330px;
-    height: 66px;
+    top: -11px;
+    width: 495px;
+    height: 99px;
     background: url('/assets/cornelius_wordmark.png') no-repeat left center;
     background-size: contain;
     z-index: 9999;
     pointer-events: none;
+    display: var(--cornelius-display, block);
   }
 }
 </style>
@@ -437,115 +426,16 @@
 
 
 
-<script>
-(function(){
-  function getLogoEl() {
-    // Try logo-dark first
-    var els = document.querySelectorAll('[data-framer-name="logo-dark"]');
-    for(var i=0;i<els.length;i++){
-      var r = els[i].getBoundingClientRect();
-      if(r.width>0 && r.height>0) return els[i];
-    }
-    // Fallback: any framer-1r8bi41 with a real rect
-    var els2 = document.querySelectorAll('.framer-1r8bi41');
-    for(var i=0;i<els2.length;i++){
-      var r = els2[i].getBoundingClientRect();
-      if(r.width>0 && r.height>0) return els2[i];
-    }
-    return null;
-  }
 
-  function inject() {
-    var w = window.innerWidth;
-    var mobile = w <= 809;
-    var lw = mobile ? 220 : 503;
-    var lh = mobile ? 44 : 101;
 
-    var logoEl = getLogoEl();
-    if(!logoEl) return false;
-
-    // Already injected at same position?
-    var existing = document.querySelector('.cornelius-logo');
-    var r = logoEl.getBoundingClientRect();
-    if(existing) {
-      var el = parseFloat(existing.style.left);
-      if(Math.abs(el - r.left) < 5) return true; // already correct
-      existing.remove();
-      var ec = document.querySelector('.cornelius-cover');
-      if(ec) ec.remove();
-    }
-
-    // Hide TwelveLabs
-    document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
-      el.style.setProperty('opacity','0','important');
-    });
-
-    // Cover (mobile + desktop - transparent so it doesn't affect desktop bg)
-    var cover = document.createElement('div');
-    cover.className = 'cornelius-cover';
-    var bg = mobile ? 'rgba(255,255,255,1)' : 'transparent';
-    cover.style.cssText = 'position:fixed;left:0;top:'+r.top+'px;width:'+(r.left+r.width+20)+'px;height:'+r.height+'px;background:'+bg+';z-index:9998;pointer-events:none';
-    document.body.appendChild(cover);
-
-    var img = document.createElement('img');
-    img.className = 'cornelius-logo';
-    img.src = '/assets/cornelius_wordmark.png';
-    img.style.cssText = 'position:fixed;left:'+r.left+'px;top:'+(r.top+r.height/2-lh/2)+'px;width:'+lw+'px;height:'+lh+'px;object-fit:contain;object-position:left center;z-index:9999;pointer-events:none';
-    document.body.appendChild(img);
-    return true;
-  }
-
-  // Poll every 300ms for up to 20 seconds
-  var timer = setInterval(function(){
-    if(inject()) clearInterval(timer);
-  }, 300);
-  setTimeout(function(){ clearInterval(timer); }, 20000);
-
-  // Re-inject if removed
-  var obs = new MutationObserver(function(){
-    if(!document.querySelector('.cornelius-logo')){
-      inject();
-    }
-    // Re-hide if Framer re-adds opacity
-    document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
-      if(el.style.opacity !== '0') el.style.setProperty('opacity','0','important');
-    });
-  });
-  obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});
-
-  window.addEventListener('resize',function(){
-    document.querySelectorAll('.cornelius-cover,.cornelius-logo').forEach(function(i){i.remove();});
-    inject();
-  });
-})();
-</script>
 <script>
 (function(){
   if(window.innerWidth > 809) return;
   var root = document.documentElement;
-  // Find the mobile navbar element
-  function getNav() {
-    return document.querySelector('.framer-Y0PUE') ||
-           document.querySelector('[data-framer-name="mobile-nav-nobg"]');
-  }
-  function syncLogo() {
-    var nav = getNav();
-    if(!nav) { root.style.setProperty('--cornelius-display','block'); return; }
-    var rect = nav.getBoundingClientRect();
-    // Show logo only when navbar is at top of screen
-    root.style.setProperty('--cornelius-display', rect.top <= 1 ? 'block' : 'none');
-  }
-  window.addEventListener('scroll', syncLogo, {passive:true});
-  // Menu open detection
-  function updateCoverBg() {
-    var nav = getNav();
-    var open = nav && nav.getBoundingClientRect().height > 100;
-    root.style.setProperty('--cornelius-cover-bg', open ? '#ffffff' : '#f4f3f3');
-  }
-  var obs = new MutationObserver(function(){ syncLogo(); updateCoverBg(); });
-  obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
-  syncLogo();
-  updateCoverBg();
+  // Hide logo when user scrolls away from top (navbar not sticky on mobile)
+  window.addEventListener('scroll', function(){
+    root.style.setProperty('--cornelius-display', window.scrollY > 5 ? 'none' : 'block');
+  }, {passive:true});
 })();
 </script>
 </body>
