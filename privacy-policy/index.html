@@ -4,7 +4,6 @@
 <html lang="en" data-redirect-timezone="1">
 <head>
 <style id="cornelius-hide">
-/* Force hide via multiple properties - Framer can't override all */
 [data-framer-name="logo-dark"],
 [data-framer-name="logo-light"],
 [data-framer-name="TL-Lockup"] {
@@ -14,17 +13,6 @@
 }
 
 @media (max-width: 809px) {
-  /* Cover at MAX z-index to beat any Framer stacking context */
-  body::before {
-    content: '';
-    position: fixed;
-    left: 0; top: 0;
-    width: 260px; height: 76px;
-    background: var(--cnav-bg, #f4f3f3);
-    z-index: 2147483647;
-    pointer-events: none;
-    opacity: var(--cnav-show, 1);
-  }
   body::after {
     content: '';
     position: fixed;
