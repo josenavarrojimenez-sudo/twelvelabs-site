@@ -4,26 +4,11 @@
 <html lang="en" data-redirect-timezone="1">
 <head>
 <style id="cornelius-hide">
-/* Hide TwelveLabs logo - display:none is stronger than opacity */
+/* clip-path hides visually but keeps layout - Framer never overrides this */
 [data-framer-name="logo-dark"],
 [data-framer-name="logo-light"],
-[data-framer-name="TL-Lockup"] { display: none !important; }
-
-@media (max-width: 809px) {
-  /* position:absolute scrolls WITH the page (not fixed) */
-  body { position: relative; }
-  body::after {
-    content: '';
-    position: absolute;
-    left: 20px;
-    top: 16px;
-    width: 495px;
-    height: 99px;
-    background: url('/assets/cornelius_wordmark.png') no-repeat left center;
-    background-size: contain;
-    z-index: 9999;
-    pointer-events: none;
-  }
+[data-framer-name="TL-Lockup"] {
+  clip-path: inset(0 100% 0 0) !important;
 }
 </style>
 	<meta charset="utf-8">
@@ -439,5 +424,49 @@
 
 
 
+<script>
+(function(){
+  if(window.innerWidth > 809) return;
+  var img = null;
+
+  function placeCornelius() {
+    // logo-dark is still in DOM (clip-path hides it visually), so getBoundingClientRect works
+    var logoEl = null;
+    document.querySelectorAll('[data-framer-name="logo-dark"]').forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if(r.width > 0 && !logoEl) logoEl = el;
+    });
+    if(!logoEl) return false;
+
+    var r = logoEl.getBoundingClientRect();
+    if(!img) {
+      img = document.createElement('img');
+      img.className = 'cornelius-logo';
+      img.src = '/assets/cornelius_wordmark.png';
+      img.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;object-fit:contain;object-position:left center;width:320px;height:64px;';
+      document.body.appendChild(img);
+    }
+    img.style.left = r.left + 'px';
+    img.style.top  = (r.top + r.height/2 - 32) + 'px';
+    return true;
+  }
+
+  // Show/hide with scroll (navbar is not sticky on mobile)
+  window.addEventListener('scroll', function(){
+    if(img) img.style.display = window.scrollY > 5 ? 'none' : 'block';
+  }, {passive:true});
+
+  // Poll until placed
+  var t = setInterval(function(){
+    if(placeCornelius()) clearInterval(t);
+  }, 200);
+  setTimeout(function(){ clearInterval(t); }, 15000);
+
+  // Re-place if React re-renders
+  new MutationObserver(function(){
+    placeCornelius();
+  }).observe(document.body, {childList:true, subtree:true});
+})();
+</script>
 </body>
 </html>
