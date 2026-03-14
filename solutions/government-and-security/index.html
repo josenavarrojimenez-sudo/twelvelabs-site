@@ -4,21 +4,26 @@
 <html lang="en" data-redirect-timezone="1">
 <head>
 <style id="cornelius-hide">
+/* Force hide via multiple properties - Framer can't override all */
 [data-framer-name="logo-dark"],
 [data-framer-name="logo-light"],
-[data-framer-name="TL-Lockup"] { opacity: 0 !important; }
+[data-framer-name="TL-Lockup"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  filter: opacity(0) !important;
+}
 
 @media (max-width: 809px) {
+  /* Cover at MAX z-index to beat any Framer stacking context */
   body::before {
     content: '';
     position: fixed;
     left: 0; top: 0;
     width: 260px; height: 76px;
     background: var(--cnav-bg, #f4f3f3);
-    z-index: 9998;
+    z-index: 2147483647;
     pointer-events: none;
     opacity: var(--cnav-show, 1);
-    transition: opacity 0.15s;
   }
   body::after {
     content: '';
@@ -27,10 +32,9 @@
     width: 330px; height: 66px;
     background: url('/assets/cornelius_wordmark.png') no-repeat left center;
     background-size: contain;
-    z-index: 9999;
+    z-index: 2147483647;
     pointer-events: none;
     opacity: var(--cnav-show, 1);
-    transition: opacity 0.15s;
   }
 }
 </style>
