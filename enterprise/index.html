@@ -594,6 +594,7 @@
 
 
 
+
 <script>
 (function(){
   var isMobile = window.innerWidth <= 809;
@@ -613,12 +614,16 @@
 
     var r = logoEl.getBoundingClientRect();
 
-    // On mobile only: add a cover matching navbar bg color
     if(isMobile) {
-      var navBg = getComputedStyle(logoEl.closest('[style*="background"]') || document.body).backgroundColor || 'transparent';
+      // Force hide TwelveLabs via setProperty (beats Framer inline styles)
+      document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
+        el.style.setProperty('opacity','0','important');
+        el.style.setProperty('visibility','hidden','important');
+      });
+      // Cover with white box
       var cover = document.createElement('div');
       cover.className = 'cornelius-cover';
-      cover.style.cssText = 'position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+(r.width+10)+'px;height:'+r.height+'px;background:'+navBg+';z-index:9998;pointer-events:none';
+      cover.style.cssText = 'position:fixed;left:0;top:'+r.top+'px;width:300px;height:'+r.height+'px;background:#ffffff;z-index:9998;pointer-events:none';
       document.body.appendChild(cover);
     }
 
@@ -630,23 +635,34 @@
     return true;
   }
 
-  var attempts = 0;
-  function tryInject() {
-    attempts++;
-    if(!inject() && attempts < 40) setTimeout(tryInject, 150);
+  // Aggressive polling + rAF for mobile
+  var done = false;
+  function loop() {
+    if(!done) {
+      done = inject();
+      requestAnimationFrame(loop);
+    }
   }
-  tryInject();
-  setTimeout(function(){ attempts=0; tryInject(); }, 1500);
+  requestAnimationFrame(loop);
+  // Stop trying after 5s but keep watching
+  setTimeout(function(){ done = true; }, 5000);
 
+  // Re-inject after any DOM change
   var obs = new MutationObserver(function(){
-    if(!document.querySelector('.cornelius-logo')){ attempts=0; tryInject(); }
+    if(!document.querySelector('.cornelius-logo')){
+      done = false;
+      requestAnimationFrame(loop);
+      setTimeout(function(){ done = true; }, 3000);
+    }
   });
   obs.observe(document.body, {childList:true, subtree:true});
 
   window.addEventListener('resize', function(){
     isMobile = window.innerWidth <= 809;
     document.querySelectorAll('.cornelius-cover,.cornelius-logo').forEach(function(i){ i.remove(); });
-    attempts=0; tryInject();
+    done = false;
+    requestAnimationFrame(loop);
+    setTimeout(function(){ done = true; }, 3000);
   });
 })();
 </script>
