@@ -224,15 +224,20 @@
 })();
 </script>
 <style>
-/* Replace TwelveLabs logo with Cornelius wordmark */
-.framer-10etwdb { display: none !important; }
+/* Cornelius logo replacement */
+/* Hide TwelveLabs symbol + wordmark */
+.framer-10etwdb,
+div[data-framer-name="TL-Lockup"],
+div[data-framer-name="logo-light"] { display: none !important; }
+/* Replace with Cornelius wordmark */
 .framer-GiF6x::before {
   content: '';
   display: block;
-  width: 160px;
-  height: 32px;
+  width: 180px;
+  height: 36px;
   background: url('/assets/cornelius_wordmark.png') no-repeat left center;
   background-size: contain;
+  position: relative;
 }
 </style>
 </head>
