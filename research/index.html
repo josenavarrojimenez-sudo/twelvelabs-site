@@ -407,14 +407,15 @@
 
 
 
+
 <script>
 (function(){
+  var isMobile = window.innerWidth <= 809;
+
   function inject() {
-    var isMobile = window.innerWidth <= 809;
     var w = isMobile ? 220 : 503;
     var h = isMobile ? 44 : 101;
 
-    // Find first logo-dark with a real bounding rect
     var logoEl = null;
     document.querySelectorAll('[data-framer-name="logo-dark"]').forEach(function(el){
       var r = el.getBoundingClientRect();
@@ -422,19 +423,19 @@
     });
     if(!logoEl) return false;
 
-    // Cover TwelveLabs with a white box + Cornelius on top (fixed, same as desktop)
-    var r = logoEl.getBoundingClientRect();
-
-    // Remove old
     document.querySelectorAll('.cornelius-cover,.cornelius-logo').forEach(function(i){ i.remove(); });
 
-    // White cover to hide TwelveLabs logo
-    var cover = document.createElement('div');
-    cover.className = 'cornelius-cover';
-    cover.style.cssText = 'position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+(r.width+40)+'px;height:'+r.height+'px;background:#fff;z-index:9998;pointer-events:none';
-    document.body.appendChild(cover);
+    var r = logoEl.getBoundingClientRect();
 
-    // Cornelius wordmark on top
+    // On mobile only: add a cover matching navbar bg color
+    if(isMobile) {
+      var navBg = getComputedStyle(logoEl.closest('[style*="background"]') || document.body).backgroundColor || 'transparent';
+      var cover = document.createElement('div');
+      cover.className = 'cornelius-cover';
+      cover.style.cssText = 'position:fixed;left:'+r.left+'px;top:'+r.top+'px;width:'+(r.width+10)+'px;height:'+r.height+'px;background:'+navBg+';z-index:9998;pointer-events:none';
+      document.body.appendChild(cover);
+    }
+
     var img = document.createElement('img');
     img.className = 'cornelius-logo';
     img.src = '/assets/cornelius_wordmark.png';
@@ -443,23 +444,21 @@
     return true;
   }
 
-  // Poll until logo is found and injected
   var attempts = 0;
   function tryInject() {
     attempts++;
-    var ok = inject();
-    if(!ok && attempts < 40) setTimeout(tryInject, 150);
+    if(!inject() && attempts < 40) setTimeout(tryInject, 150);
   }
   tryInject();
   setTimeout(function(){ attempts=0; tryInject(); }, 1500);
 
-  // Re-inject if logo disappears (React re-render)
   var obs = new MutationObserver(function(){
-    if(!document.querySelector('.cornelius-logo')) { attempts=0; tryInject(); }
+    if(!document.querySelector('.cornelius-logo')){ attempts=0; tryInject(); }
   });
   obs.observe(document.body, {childList:true, subtree:true});
 
   window.addEventListener('resize', function(){
+    isMobile = window.innerWidth <= 809;
     document.querySelectorAll('.cornelius-cover,.cornelius-logo').forEach(function(i){ i.remove(); });
     attempts=0; tryInject();
   });
