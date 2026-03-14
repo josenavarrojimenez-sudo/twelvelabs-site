@@ -242,10 +242,17 @@
 div[data-framer-name="TL-Lockup"],
 div[data-framer-name="logo-light"] { visibility: hidden !important; }
 /* Overlay Cornelius wordmark on the exact logo container (179x36) */
+.framer-1r8bi41 {
+  overflow: visible !important;
+  width: 268px !important;
+  height: 54px !important;
+}
 .framer-1r8bi41::before {
   content: '';
   position: absolute;
   inset: 0;
+  width: 268px;
+  height: 54px;
   background: url('/assets/cornelius_wordmark.png') no-repeat left center;
   background-size: contain;
   z-index: 10;
