@@ -6,7 +6,7 @@
 <style id="cornelius-hide">
 [data-framer-name="logo-dark"],
 [data-framer-name="logo-light"],
-[data-framer-name="TL-Lockup"] { display: none !important; }
+[data-framer-name="TL-Lockup"] { opacity: 0 !important; }
 </style>
 	<meta charset="utf-8">
 	
@@ -412,35 +412,29 @@
 
 
 
+
 <script>
 (function(){
   function injectCornelius() {
-    // Find ALL logo-dark elements, use the first VISIBLE one
-    var logoEls = document.querySelectorAll('[data-framer-name="logo-dark"]');
+    var isMobile = window.innerWidth <= 809;
+    var w = isMobile ? 220 : 503;
+    var h = isMobile ? 44 : 101;
+
+    // Find the visible logo-dark (has a real bounding rect)
     var logoEl = null;
-    logoEls.forEach(function(el){
+    document.querySelectorAll('[data-framer-name="logo-dark"]').forEach(function(el){
       var rect = el.getBoundingClientRect();
       if(rect.width > 0 && rect.height > 0 && !logoEl) logoEl = el;
     });
     if(!logoEl) return;
 
-    // Hide TwelveLabs logo parts
-    document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
-      el.style.display='none';
-    });
-
-    // Remove any previously injected logo
-    document.querySelectorAll('img.cornelius-logo').forEach(function(i){i.remove();});
+    // Remove existing Cornelius logo
+    document.querySelectorAll('img.cornelius-logo').forEach(function(i){ i.remove(); });
 
     var rect = logoEl.getBoundingClientRect();
-    var isMobile = window.innerWidth <= 809;
-    var w = isMobile ? 220 : 503;
-    var h = isMobile ? 44 : 101;
-
     var img = document.createElement('img');
     img.className = 'cornelius-logo';
     img.src = '/assets/cornelius_wordmark.png';
-    // Fixed position exactly where logo-dark is on screen
     img.style.cssText = [
       'position:fixed',
       'left:' + rect.left + 'px',
@@ -455,13 +449,10 @@
     document.body.appendChild(img);
   }
 
-  // Run after Framer hydrates
-  [200, 500, 1000, 2000].forEach(function(t){ setTimeout(injectCornelius, t); });
+  [200, 600, 1200].forEach(function(t){ setTimeout(injectCornelius, t); });
 
-  // Watch for DOM changes (React re-renders)
   var observer = new MutationObserver(function(){
-    var existing = document.querySelector('img.cornelius-logo');
-    if(!existing) injectCornelius();
+    if(!document.querySelector('img.cornelius-logo')) injectCornelius();
   });
   observer.observe(document.body, {childList:true, subtree:true});
 
