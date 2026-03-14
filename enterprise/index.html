@@ -3,6 +3,11 @@
 <!-- Published Mar 13, 2026, 3:01 PM UTC -->
 <html lang="en" data-redirect-timezone="1">
 <head>
+<style id="cornelius-hide">
+[data-framer-name="logo-dark"] > *,
+[data-framer-name="logo-light"] > *,
+[data-framer-name="TL-Lockup"] { visibility: hidden !important; }
+</style>
 	<meta charset="utf-8">
 	
 	
@@ -605,7 +610,7 @@
       var img=document.createElement('img');
       img.className='cornelius-logo';
       img.src='/assets/cornelius_wordmark.png';
-      img.style.cssText='position:absolute;left:0;top:50%;transform:translateY(-45%);width:'+w+'px;height:'+h+'px;object-fit:contain;z-index:999;pointer-events:none;';
+      img.style.cssText='position:absolute;left:0;top:0;bottom:0;margin:auto;width:'+w+'px;height:'+h+'px;object-fit:contain;z-index:999;pointer-events:none;';
       c.appendChild(img);
     });
   }
