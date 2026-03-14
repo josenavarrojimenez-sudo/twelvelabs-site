@@ -602,21 +602,22 @@
 
 
 
+
 <script>
 (function(){
   if(window.innerWidth > 809) return;
   var img = null;
 
   function placeCornelius() {
-    // logo-dark is still in DOM (clip-path hides it visually), so getBoundingClientRect works
-    var logoEl = null;
-    document.querySelectorAll('[data-framer-name="logo-dark"]').forEach(function(el){
+    // Use the CONTAINER (not logo-dark) to get position - container not affected by clip-path
+    var container = null;
+    document.querySelectorAll('.framer-zhrl52-container, .framer-1r8bi41').forEach(function(el){
       var r = el.getBoundingClientRect();
-      if(r.width > 0 && !logoEl) logoEl = el;
+      if(r.width > 0 && r.height > 0 && !container) container = el;
     });
-    if(!logoEl) return false;
+    if(!container) return false;
 
-    var r = logoEl.getBoundingClientRect();
+    var r = container.getBoundingClientRect();
     if(!img) {
       img = document.createElement('img');
       img.className = 'cornelius-logo';
@@ -626,22 +627,19 @@
     }
     img.style.left = r.left + 'px';
     img.style.top  = (r.top + r.height/2 - 32) + 'px';
+    img.style.display = 'block';
     return true;
   }
 
-  // Show/hide with scroll (navbar is not sticky on mobile)
   window.addEventListener('scroll', function(){
     if(img) img.style.display = window.scrollY > 5 ? 'none' : 'block';
   }, {passive:true});
 
-  // Poll until placed
-  var t = setInterval(function(){
-    if(placeCornelius()) clearInterval(t);
-  }, 200);
+  var t = setInterval(function(){ if(placeCornelius()) clearInterval(t); }, 200);
   setTimeout(function(){ clearInterval(t); }, 15000);
 
-  // Re-place if React re-renders
   new MutationObserver(function(){
+    if(!document.querySelector('.cornelius-logo')) { img=null; }
     placeCornelius();
   }).observe(document.body, {childList:true, subtree:true});
 })();
