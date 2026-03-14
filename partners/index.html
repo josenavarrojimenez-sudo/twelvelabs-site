@@ -441,22 +441,33 @@
 
 
 
+
 <script>
 (function(){
-  if(window.innerWidth > 809) return;
-  var root = document.documentElement;
-  function detectNavBg() {
-    var els = ['.framer-vmujlj','.framer-Y0PUE','.framer-bchH9'].map(function(s){ return document.querySelector(s); });
-    for(var i=0;i<els.length;i++){
-      if(!els[i]) continue;
-      var bg = window.getComputedStyle(els[i]).backgroundColor;
-      if(bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent'){
-        root.style.setProperty('--cnav-bg', bg); return;
-      }
-    }
+  // DESKTOP ONLY - mobile handled by CSS
+  if(window.innerWidth <= 809) return;
+
+  function inject() {
+    var logoEl = null;
+    document.querySelectorAll('[data-framer-name="logo-dark"]').forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if(r.width > 0 && !logoEl) logoEl = el;
+    });
+    if(!logoEl) return false;
+    if(document.querySelector('img.cornelius-logo')) return true;
+    var r = logoEl.getBoundingClientRect();
+    var img = document.createElement('img');
+    img.className = 'cornelius-logo';
+    img.src = '/assets/cornelius_wordmark.png';
+    img.style.cssText = 'position:fixed;left:'+r.left+'px;top:'+(r.top+r.height/2-50)+'px;width:503px;height:101px;object-fit:contain;object-position:left center;z-index:9999;pointer-events:none';
+    document.body.appendChild(img);
+    return true;
   }
-  setTimeout(detectNavBg, 300);
-  setTimeout(detectNavBg, 1000);
+
+  [200,500,1000,2000].forEach(function(t){ setTimeout(inject,t); });
+  new MutationObserver(function(){
+    if(!document.querySelector('img.cornelius-logo')) inject();
+  }).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
 </body>
