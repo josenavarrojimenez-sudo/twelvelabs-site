@@ -225,11 +225,13 @@
 </script>
 <style>
 /* Cornelius logo replacement */
-/* Hide TwelveLabs symbol + text wordmark */
+/* Hide ALL TwelveLabs logo elements */
 .framer-10etwdb,
 div[data-framer-name="TL-Lockup"],
-div[data-framer-name="logo-light"] { visibility: hidden !important; }
-/* Overlay Cornelius wordmark on the exact logo container (179x36) */
+div[data-framer-name="logo-light"],
+div[data-framer-name="logo-dark"] { visibility: hidden !important; }
+
+/* Desktop logo container */
 .framer-1r8bi41 {
   overflow: visible !important;
 }
@@ -244,6 +246,22 @@ div[data-framer-name="logo-light"] { visibility: hidden !important; }
   background: url('/assets/cornelius_wordmark.png') no-repeat left center;
   background-size: contain;
   z-index: 10;
+}
+
+/* Mobile: fix overflow on parent containers */
+.framer-zhrl52-container,
+.framer-zhrl52 {
+  overflow: visible !important;
+  width: auto !important;
+}
+
+/* Mobile logo - smaller size */
+@media (max-width: 809px) {
+  .framer-1r8bi41::before {
+    width: 220px;
+    height: 44px;
+    transform: translateY(-50%);
+  }
 }
 </style>
 </head>
