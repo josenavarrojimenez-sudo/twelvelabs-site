@@ -415,55 +415,61 @@
     <!-- End of bodyEnd -->
 
 
+
 <script>
 (function(){
   function injectCornelius() {
-    var isMobile = window.innerWidth <= 809;
-    var w = isMobile ? 220 : 503;
-    var h = isMobile ? 44 : 101;
+    // Find ALL logo-dark elements, use the first VISIBLE one
+    var logoEls = document.querySelectorAll('[data-framer-name="logo-dark"]');
+    var logoEl = null;
+    logoEls.forEach(function(el){
+      var rect = el.getBoundingClientRect();
+      if(rect.width > 0 && rect.height > 0 && !logoEl) logoEl = el;
+    });
+    if(!logoEl) return;
 
     // Hide TwelveLabs logo parts
     document.querySelectorAll('[data-framer-name="logo-dark"],[data-framer-name="logo-light"],[data-framer-name="TL-Lockup"]').forEach(function(el){
       el.style.visibility='hidden';
     });
 
-    // Find the logo-dark element — that's where we want the Cornelius logo
-    var logoEl = document.querySelector('[data-framer-name="logo-dark"]');
-    if(!logoEl) return;
-    var parent = logoEl.closest('a[href]') || logoEl.parentElement;
+    // Remove any previously injected logo
+    document.querySelectorAll('img.cornelius-logo').forEach(function(i){i.remove();});
 
-    // Skip if already injected
-    if(parent.querySelector('img.cornelius-logo')) return;
-
-    // Make parent overflow visible
-    var p = parent;
-    for(var i=0;i<8;i++){if(!p)break;p.style.overflow='visible';p=p.parentElement;}
+    var rect = logoEl.getBoundingClientRect();
+    var isMobile = window.innerWidth <= 809;
+    var w = isMobile ? 220 : 503;
+    var h = isMobile ? 44 : 101;
 
     var img = document.createElement('img');
     img.className = 'cornelius-logo';
     img.src = '/assets/cornelius_wordmark.png';
-    img.style.cssText = 'position:absolute;left:0;top:50%;transform:translateY(-50%);width:'+w+'px;height:'+h+'px;object-fit:contain;z-index:999;pointer-events:none;';
-    parent.style.position = 'relative';
-    parent.style.overflow = 'visible';
-    parent.appendChild(img);
+    // Fixed position exactly where logo-dark is on screen
+    img.style.cssText = [
+      'position:fixed',
+      'left:' + rect.left + 'px',
+      'top:' + (rect.top + rect.height/2 - h/2) + 'px',
+      'width:' + w + 'px',
+      'height:' + h + 'px',
+      'object-fit:contain',
+      'object-position:left center',
+      'z-index:9999',
+      'pointer-events:none'
+    ].join(';');
+    document.body.appendChild(img);
   }
 
-  injectCornelius();
-  [100,300,600,1200,2500].forEach(function(t){setTimeout(injectCornelius,t);});
+  // Run after Framer hydrates
+  [200, 500, 1000, 2000].forEach(function(t){ setTimeout(injectCornelius, t); });
 
-  var observer = new MutationObserver(function(mutations){
-    for(var m of mutations){
-      if(m.addedNodes.length){
-        injectCornelius();
-        break;
-      }
-    }
+  // Watch for DOM changes (React re-renders)
+  var observer = new MutationObserver(function(){
+    var existing = document.querySelector('img.cornelius-logo');
+    if(!existing) injectCornelius();
   });
-  observer.observe(document.body,{childList:true,subtree:true});
-  window.addEventListener('resize',function(){
-    document.querySelectorAll('img.cornelius-logo').forEach(function(i){i.remove();});
-    injectCornelius();
-  });
+  observer.observe(document.body, {childList:true, subtree:true});
+
+  window.addEventListener('resize', injectCornelius);
 })();
 </script>
 </body>
