@@ -1,0 +1,6 @@
+/assets/*.mjs
+  Cache-Control: no-cache, must-revalidate
+  Content-Type: application/javascript
+
+/*.html
+  Cache-Control: no-cache, must-revalidate

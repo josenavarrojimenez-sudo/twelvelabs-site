@@ -213,6 +213,27 @@
       scrollbar-width: none !important; /* Firefox */
     }
   </style><!-- SnippetEnd: legacy-headEnd-jn0zWy_xD --><!-- End of headEnd -->
+<script>
+// Force full-page navigation for internal links (Framer SPA routing is broken in static clone)
+(function(){
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('a[href]');
+    if (!a) return;
+    var href = a.getAttribute('href');
+    if (!href) return;
+    // Only intercept internal absolute paths
+    if (href.charAt(0) === '/' && href.charAt(1) !== '/') {
+      // Skip anchors-only
+      if (href.charAt(0) === '#') return;
+      // Skip if already navigating to same page
+      if (window.location.pathname === href) return;
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.href = href;
+    }
+  }, true);
+})();
+</script>
 </head>
 <body>
 	<script async src="https://events.framer.com/script?v=2" data-fid="e8cfcc253a8367dde7ae21aff6639392bbe92b83ec4d9b1cfe0e522fb6f2c41f" data-no-nt></script>
