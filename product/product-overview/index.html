@@ -237,19 +237,18 @@
 </script>
 <style>
 /* Cornelius logo replacement */
-/* Hide TwelveLabs symbol + wordmark */
+/* Hide TwelveLabs symbol + text wordmark */
 .framer-10etwdb,
 div[data-framer-name="TL-Lockup"],
-div[data-framer-name="logo-light"] { display: none !important; }
-/* Replace with Cornelius wordmark */
-.framer-GiF6x::before {
+div[data-framer-name="logo-light"] { visibility: hidden !important; }
+/* Overlay Cornelius wordmark on the exact logo container (179x36) */
+.framer-1r8bi41::before {
   content: '';
-  display: block;
-  width: 180px;
-  height: 36px;
+  position: absolute;
+  inset: 0;
   background: url('/assets/cornelius_wordmark.png') no-repeat left center;
   background-size: contain;
-  position: relative;
+  z-index: 10;
 }
 </style>
 </head>
