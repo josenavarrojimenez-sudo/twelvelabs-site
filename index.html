@@ -223,48 +223,7 @@
   }, true);
 })();
 </script>
-<style>
-/* Cornelius logo replacement */
-/* Hide ALL TwelveLabs logo elements */
-.framer-10etwdb,
-div[data-framer-name="TL-Lockup"],
-div[data-framer-name="logo-light"],
-div[data-framer-name="logo-dark"] { visibility: hidden !important; }
 
-/* Desktop logo container */
-.framer-1r8bi41 {
-  overflow: visible !important;
-}
-.framer-1r8bi41::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-45%);
-  width: 503px;
-  height: 101px;
-  background: url('/assets/cornelius_wordmark.png') no-repeat left center;
-  background-size: contain;
-  z-index: 10;
-  pointer-events: none;
-}
-
-/* Mobile: fix overflow on parent containers */
-.framer-zhrl52-container,
-.framer-zhrl52 {
-  overflow: visible !important;
-  width: auto !important;
-}
-
-/* Mobile logo - smaller size */
-@media (max-width: 809px) {
-  .framer-1r8bi41::before {
-    width: 220px;
-    height: 44px;
-    transform: translateY(-50%);
-  }
-}
-</style>
 </head>
 <body>
 	<script async src="https://events.framer.com/script?v=2" data-fid="e8cfcc253a8367dde7ae21aff6639392bbe92b83ec4d9b1cfe0e522fb6f2c41f" data-no-nt></script>
@@ -639,13 +598,17 @@ function replaceLogo() {
   var w = isMobile ? 220 : 503;
   var h = isMobile ? 44 : 101;
 
+  // Hide all TwelveLabs logo parts
   document.querySelectorAll('[data-framer-name="logo-dark"], [data-framer-name="logo-light"], [data-framer-name="TL-Lockup"]').forEach(function(el) {
     el.style.visibility = 'hidden';
   });
 
+  // Only target containers that aren't already done
   document.querySelectorAll('.framer-1r8bi41').forEach(function(container) {
-    if (container.dataset.corneliusDone) return;
-    container.dataset.corneliusDone = '1';
+    // Remove old injected images first (for resize)
+    container.querySelectorAll('img.cornelius-logo').forEach(function(i){ i.remove(); });
+    
+    // Make overflow visible up the chain
     container.style.overflow = 'visible';
     var p = container.parentElement;
     for (var i = 0; i < 6; i++) {
@@ -654,8 +617,9 @@ function replaceLogo() {
       p = p.parentElement;
     }
     var img = document.createElement('img');
+    img.className = 'cornelius-logo';
     img.src = '/assets/cornelius_wordmark.png';
-    img.style.cssText = 'position:absolute;left:0;top:50%;transform:translateY(-50%);width:' + w + 'px;height:' + h + 'px;object-fit:contain;z-index:10;pointer-events:none;';
+    img.style.cssText = 'position:absolute;left:0;top:50%;transform:translateY(-50%);width:' + w + 'px;height:' + h + 'px;object-fit:contain;z-index:10;pointer-events:none;display:block;';
     container.appendChild(img);
   });
 }
@@ -663,16 +627,8 @@ function replaceLogo() {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', replaceLogo);
 } else { replaceLogo(); }
-setTimeout(replaceLogo, 300);
-setTimeout(replaceLogo, 1000);
-window.addEventListener('resize', function() {
-  document.querySelectorAll('[data-cornelius-done]').forEach(function(el) {
-    delete el.dataset.corneliusDone;
-    var imgs = el.querySelectorAll('img[src*="cornelius"]');
-    imgs.forEach(function(i){ i.remove(); });
-  });
-  replaceLogo();
-});
+setTimeout(replaceLogo, 800);
+window.addEventListener('resize', replaceLogo);
 </script>
 </body>
 </html>
